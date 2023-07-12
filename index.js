@@ -21,6 +21,8 @@ app.use(express.json())
 //     }
 //   ]
 
+console.log("test")
+
 let persons = [
     { 
       "id": 1,
