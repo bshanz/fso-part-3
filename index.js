@@ -1,6 +1,9 @@
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
+const cors = require('cors')
+
+app.use(cors())
 
 app.use(express.json())
 
@@ -10,23 +13,23 @@ morgan.token('body', function (req, res) { return JSON.stringify(req.body) })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
 
 
-// let notes = [
-//     {
-//       id: 1,
-//       content: "HTML is easy",
-//       important: true
-//     },
-//     {
-//       id: 2,
-//       content: "Browser can execute only JavaScript",
-//       important: false
-//     },
-//     {
-//       id: 3,
-//       content: "GET and POST are the most important methods of HTTP protocol",
-//       important: true
-//     }
-//   ]
+let notes = [
+    {
+      id: 1,
+      content: "HTML is easy",
+      important: true
+    },
+    {
+      id: 2,
+      content: "Browser can execute only JavaScript",
+      important: false
+    },
+    {
+      id: 3,
+      content: "GET and POST are the most important methods of HTTP protocol",
+      important: true
+    }
+  ]
 
 const requestLogger = (request, response, next) => {
     console.log('Method:', request.method)
@@ -38,109 +41,69 @@ const requestLogger = (request, response, next) => {
 
   app.use(requestLogger)
 
-let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
-
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
 
-app.get('/api/persons', (request, response) => {
-  response.json(persons)
+app.get('/api/notes', (request, response) => {
+  response.json(notes)
 })
 
-app.get('/api/info', (request, response) => {
-    const requestReceivedAt = new Date();
-    console.log(requestReceivedAt);
-
-    response.send(
-        `<p>Phonebook has info for ${persons.length} people</p>`
-        + `<p>Request received at: ${requestReceivedAt}</p>`
-    );
-});
-
-
-app.get('/api/persons/:id', (request, response) => {
+app.get('/api/notes/:id', (request, response) => {
     const id = Number(request.params.id)
-    const person = persons.find(person => person.id === id)
+    const note = notes.find(note => note.id === id)
     
   
-    if (person) {
-      response.json(person)
+    if (note) {
+      response.json(note)
     } else {
       response.status(404).end()
     }
   })
 
-  app.delete('/api/persons/:id', (request, response) => {
+  app.delete('/api/notes/:id', (request, response) => {
     // Get the ID of the request
     const id = Number(request.params.id)
     // Filter the notes so that they no longer contain that ID
-    persons = persons.filter(person => person.id !== id)
+    notes = notes.filter(note => note.id !== id)
   
     response.status(204).end()
   })
 
-//   const generateId = () => {
-//     const maxId = notes.length > 0
-//       ? Math.max(...notes.map(n => n.id))
-//       : 0
-//     return maxId + 1
-//   }
 
 const generateId = () => {
     const randomNumber = Math.floor(Math.random() * 10001);
     return randomNumber
 }
   
-  app.post('/api/persons', (request, response) => {
+  app.post('/api/notes', (request, response) => {
     const body = request.body
-    console.log(body.name)
-    console.log(body.number)
+    console.log(body.content)
+    console.log(body.important)
   
-    if (!body.name || !body.number) {
+    if (!body.content || !body.important) {
       return response.status(400).json({ 
-        error: 'name or number missing' 
+        error: 'content or importance missing' 
       })
     }
 
-    let exists = persons.some(person => person.name === body.name)
+    let exists = notes.some(note => note.content === body.content)
 
     if (exists){
         return response.status(400).json({
-            error: "name must be unique"
+            error: "content must be unique"
         })
     }
   
-    const person = {
-      name: body.name,
-      number: body.number || false,
+    const note = {
+      content: body.content,
+      important: body.important || false,
       id: generateId(),
     }
   
-    persons = persons.concat(person)
+    notes = notes.concat(note)
   
-    response.json(person)
+    response.json(note)
   })
 
   const unknownEndpoint = (request, response) => {
@@ -150,10 +113,10 @@ const generateId = () => {
   app.use(unknownEndpoint)
 
 
-const PORT = 3001
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+  const PORT = process.env.PORT || 3001
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`)
+  })
 
 
 
