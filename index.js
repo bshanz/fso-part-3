@@ -12,25 +12,6 @@ morgan.token('body', function (req, res) { return JSON.stringify(req.body) })
 // Include the standard 'tiny' format information, plus the body
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
 
-
-// let notes = [
-//     {
-//       id: 1,
-//       content: "HTML is easy",
-//       important: true
-//     },
-//     {
-//       id: 2,
-//       content: "Browser can execute only JavaScript",
-//       important: false
-//     },
-//     {
-//       id: 3,
-//       content: "GET and POST are the most important methods of HTTP protocol",
-//       important: true
-//     }
-//   ]
-
 const requestLogger = (request, response, next) => {
     console.log('Method:', request.method)
     console.log('Path:  ', request.path)
