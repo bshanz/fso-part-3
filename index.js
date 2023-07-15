@@ -7,6 +7,10 @@ app.use(cors())
 
 app.use(express.json())
 
+app.use(express.static('dist'))
+
+console.log("Part 3.11 done")
+
 morgan.token('body', function (req, res) { return JSON.stringify(req.body) })
 
 // Include the standard 'tiny' format information, plus the body
