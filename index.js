@@ -12,25 +12,6 @@ morgan.token('body', function (req, res) { return JSON.stringify(req.body) })
 // Include the standard 'tiny' format information, plus the body
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'));
 
-
-let notes = [
-    {
-      id: 1,
-      content: "HTML is easy",
-      important: true
-    },
-    {
-      id: 2,
-      content: "Browser can execute only JavaScript",
-      important: false
-    },
-    {
-      id: 3,
-      content: "GET and POST are the most important methods of HTTP protocol",
-      important: true
-    }
-  ]
-
 const requestLogger = (request, response, next) => {
     console.log('Method:', request.method)
     console.log('Path:  ', request.path)
@@ -41,69 +22,109 @@ const requestLogger = (request, response, next) => {
 
   app.use(requestLogger)
 
+let persons = [
+    { 
+      "id": 1,
+      "name": "Arto Hellas", 
+      "number": "040-123456"
+    },
+    { 
+      "id": 2,
+      "name": "Ada Lovelace", 
+      "number": "39-44-5323523"
+    },
+    { 
+      "id": 3,
+      "name": "Dan Abramov", 
+      "number": "12-43-234345"
+    },
+    { 
+      "id": 4,
+      "name": "Mary Poppendieck", 
+      "number": "39-23-6423122"
+    }
+]
+
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
 
-app.get('/api/notes', (request, response) => {
-  response.json(notes)
+app.get('/api/persons', (request, response) => {
+  response.json(persons)
 })
 
-app.get('/api/notes/:id', (request, response) => {
+app.get('/api/info', (request, response) => {
+    const requestReceivedAt = new Date();
+    console.log(requestReceivedAt);
+
+    response.send(
+        `<p>Phonebook has info for ${persons.length} people</p>`
+        + `<p>Request received at: ${requestReceivedAt}</p>`
+    );
+});
+
+
+app.get('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
-    const note = notes.find(note => note.id === id)
+    const person = persons.find(person => person.id === id)
     
   
-    if (note) {
-      response.json(note)
+    if (person) {
+      response.json(person)
     } else {
       response.status(404).end()
     }
   })
 
-  app.delete('/api/notes/:id', (request, response) => {
+  app.delete('/api/persons/:id', (request, response) => {
     // Get the ID of the request
     const id = Number(request.params.id)
     // Filter the notes so that they no longer contain that ID
-    notes = notes.filter(note => note.id !== id)
+    persons = persons.filter(person => person.id !== id)
   
     response.status(204).end()
   })
 
+//   const generateId = () => {
+//     const maxId = notes.length > 0
+//       ? Math.max(...notes.map(n => n.id))
+//       : 0
+//     return maxId + 1
+//   }
 
 const generateId = () => {
     const randomNumber = Math.floor(Math.random() * 10001);
     return randomNumber
 }
   
-  app.post('/api/notes', (request, response) => {
+  app.post('/api/persons', (request, response) => {
     const body = request.body
-    console.log(body.content)
-    console.log(body.important)
+    console.log(body.name)
+    console.log(body.number)
   
-    if (!body.content || !body.important) {
+    if (!body.name || !body.number) {
       return response.status(400).json({ 
-        error: 'content or importance missing' 
+        error: 'name or number missing' 
       })
     }
 
-    let exists = notes.some(note => note.content === body.content)
+    let exists = persons.some(person => person.name === body.name)
 
     if (exists){
         return response.status(400).json({
-            error: "content must be unique"
+            error: "name must be unique"
         })
     }
   
-    const note = {
-      content: body.content,
-      important: body.important || false,
+    const person = {
+      name: body.name,
+      number: body.number || false,
       id: generateId(),
     }
   
-    notes = notes.concat(note)
+    persons = persons.concat(person)
   
-    response.json(note)
+    response.json(person)
   })
 
   const unknownEndpoint = (request, response) => {
@@ -113,10 +134,14 @@ const generateId = () => {
   app.use(unknownEndpoint)
 
 
-  const PORT = process.env.PORT || 3001
-  app.listen(PORT, () => {
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
   })
+
+
+
+
 
 
 

@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for part-2-notes on 2023-07-13T13:26:33-04:00
+# fly.toml app configuration file generated for part-3-phonebook-exercises on 2023-07-15T11:59:02-04:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = "part-2-notes"
+app = "part-3-phonebook-exercises"
 primary_region = "bos"
 
 [env]
@@ -16,3 +16,4 @@ primary_region = "bos"
   auto_start_machines = true
   min_machines_running = 0
   processes = ["app"]
+
