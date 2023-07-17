@@ -7,6 +7,23 @@ app.use(cors())
 
 app.use(express.json())
 
+const mongoose = require('mongoose')
+const password = '129ajlzEcNdDf2b0'
+
+// DO NOT SAVE YOUR PASSWORD TO GITHUB!!
+const url =
+  `mongodb+srv://fullstack:${password}@cluster0.o1opl.mongodb.net/?retryWrites=true&w=majority`
+
+mongoose.set('strictQuery',false)
+mongoose.connect(url)
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  important: Boolean,
+})
+
+const Note = mongoose.model('Note', noteSchema)
+
 morgan.token('body', function (req, res) { return JSON.stringify(req.body) })
 
 // Include the standard 'tiny' format information, plus the body
@@ -46,8 +63,14 @@ app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
 
+// app.get('/api/notes', (request, response) => {
+//   response.json(notes)
+// })
+
 app.get('/api/notes', (request, response) => {
-  response.json(notes)
+  Note.find({}).then(notes => {
+    response.json(notes)
+  })
 })
 
 app.get('/api/notes/:id', (request, response) => {
