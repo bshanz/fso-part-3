@@ -1,28 +1,36 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
+const Note = require('./models/note')
 
 app.use(cors())
 
 app.use(express.json())
 
-const mongoose = require('mongoose')
-const password = '129ajlzEcNdDf2b0'
+// const mongoose = require('mongoose')
+// //const password = 'TIU14dU1H5KIFqY2'
+const password = process.env.PASSWORD
 
-// DO NOT SAVE YOUR PASSWORD TO GITHUB!!
-const url =
-  `mongodb+srv://fullstack:${password}@cluster0.o1opl.mongodb.net/?retryWrites=true&w=majority`
+// const url =
+//   `mongodb+srv://brianshanley24:${password}@cluster0.um9s28l.mongodb.net/noteApp?retryWrites=true&w=majority`
 
-mongoose.set('strictQuery',false)
-mongoose.connect(url)
+// mongoose.set('strictQuery',false)
+// mongoose.connect(url)
 
-const noteSchema = new mongoose.Schema({
-  content: String,
-  important: Boolean,
-})
+// const noteSchema = new mongoose.Schema({
+//   content: String,
+//   important: Boolean,
+// })
 
-const Note = mongoose.model('Note', noteSchema)
+// noteSchema.set('toJSON', {
+//   transform: (document, returnedObject) => {
+//     returnedObject.id = returnedObject._id.toString()
+//     delete returnedObject._id
+//     delete returnedObject.__v
+//   }
+// })
 
 morgan.token('body', function (req, res) { return JSON.stringify(req.body) })
 
@@ -137,7 +145,7 @@ const generateId = () => {
   app.use(unknownEndpoint)
 
 
-  const PORT = process.env.PORT || 3001
+  const PORT = process.env.PORT
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
   })
