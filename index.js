@@ -3,6 +3,7 @@ const express = require('express')
 const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('person')
 
 app.use(cors())
 
@@ -54,8 +55,15 @@ app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
 
+// app.get('/api/persons', (request, response) => {
+//   response.json(persons)
+// })
+
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+  Person.find({}).then(persons => {
+    console.log("found")
+    response.json(persons)
+  })
 })
 
 app.get('/api/info', (request, response) => {
