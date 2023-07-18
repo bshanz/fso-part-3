@@ -1,7 +1,9 @@
+require('dotenv').config()
 const express = require('express')
 const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
 
 app.use(cors())
 
@@ -26,35 +28,42 @@ const requestLogger = (request, response, next) => {
 
   app.use(requestLogger)
 
-let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
+// let persons = [
+//     { 
+//       "id": 1,
+//       "name": "Arto Hellas", 
+//       "number": "040-123456"
+//     },
+//     { 
+//       "id": 2,
+//       "name": "Ada Lovelace", 
+//       "number": "39-44-5323523"
+//     },
+//     { 
+//       "id": 3,
+//       "name": "Dan Abramov", 
+//       "number": "12-43-234345"
+//     },
+//     { 
+//       "id": 4,
+//       "name": "Mary Poppendieck", 
+//       "number": "39-23-6423122"
+//     }
+// ]
 
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
 
+// app.get('/api/persons', (request, response) => {
+//   response.json(persons)
+// })
+
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
+  Person.find({}).then(persons => {
+    console.log("found")
+    response.json(persons)
+  })
 })
 
 app.get('/api/info', (request, response) => {
@@ -80,13 +89,10 @@ app.get('/api/persons/:id', (request, response) => {
     }
   })
 
-  app.delete('/api/persons/:id', (request, response) => {
-    // Get the ID of the request
-    const id = Number(request.params.id)
-    // Filter the notes so that they no longer contain that ID
-    persons = persons.filter(person => person.id !== id)
-  
-    response.status(204).end()
+  app.get('/api/person/:id', (request, response) => {
+    Person.findById(request.params.id).then(person => {
+      response.json(person)
+    })
   })
 
 //   const generateId = () => {
@@ -101,35 +107,22 @@ const generateId = () => {
     return randomNumber
 }
   
-  app.post('/api/persons', (request, response) => {
-    const body = request.body
-    console.log(body.name)
-    console.log(body.number)
-  
-    if (!body.name || !body.number) {
-      return response.status(400).json({ 
-        error: 'name or number missing' 
-      })
-    }
+app.post('/api/persons', (request, response) => {
+  const body = request.body
 
-    let exists = persons.some(person => person.name === body.name)
+  if (body.name === undefined) {
+    return response.status(400).json({ error: 'content missing' })
+  }
 
-    if (exists){
-        return response.status(400).json({
-            error: "name must be unique"
-        })
-    }
-  
-    const person = {
-      name: body.name,
-      number: body.number || false,
-      id: generateId(),
-    }
-  
-    persons = persons.concat(person)
-  
-    response.json(person)
+  const person = new Person({
+    name: body.name,
+    number: body.number
   })
+
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
+})
 
   const unknownEndpoint = (request, response) => {
     response.status(404).send({ error: 'unknown endpoint' })
@@ -138,7 +131,7 @@ const generateId = () => {
   app.use(unknownEndpoint)
 
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
   })
