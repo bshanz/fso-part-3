@@ -6,6 +6,8 @@ const cors = require('cors')
 const Person = require('./models/person')
 const person = require('./models/person')
 
+console.log("updated")
+
 app.use(cors())
 
 app.use(express.json())
