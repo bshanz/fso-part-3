@@ -4,6 +4,9 @@ const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
+const person = require('./models/person')
+
+console.log("updated")
 
 app.use(cors())
 
@@ -61,27 +64,39 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/api/info', (request, response) => {
-    const requestReceivedAt = new Date();
-    console.log(requestReceivedAt);
+  const requestReceivedAt = new Date();
+  console.log(requestReceivedAt);
 
-    response.send(
-        `<p>Phonebook has info for ${persons.length} people</p>`
+  Person.countDocuments({})
+    .then(count => {
+      response.send(
+        `<p>Phonebook has info for ${count} people</p>`
         + `<p>Request received at: ${requestReceivedAt}</p>`
-    );
+      );
+    })
+    .catch(err => {
+      console.log('Error counting documents:', err);
+      response.status(500).json(err);
+    });
 });
 
+app.get('/api/persons/:id', async (request, response, next) => {
+  const id = request.params.id;
 
-app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = persons.find(person => person.id === id)
-    
-  
-    if (person) {
-      response.json(person)
-    } else {
-      response.status(404).end()
-    }
-  })
+  try {
+      const person = await Person.findById(id);
+
+      if (person) {
+          response.json(person);
+      } else {
+          response.status(404).end();
+      }
+  } catch (error) {
+      console.log(error);
+      next(error);
+  }
+});
+
 
   app.get('/api/person/:id', (request, response) => {
     Person.findById(request.params.id).then(person => {
