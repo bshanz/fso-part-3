@@ -1,63 +1,44 @@
 const mongoose = require('mongoose')
-require('dotenv').config()
 
-if (process.argv.length<3) {
-  console.log('give password as argument')
+if (process.argv.length < 3) {
+  console.log('Usage:')
+  console.log('To add a person: node mongo.js <password> <name> <number>')
+  console.log('To display all people: node mongo.js <password>')
   process.exit(1)
 }
 
-//const password = process.argv[2]
-const password = 'TIU14dU1H5KIFqY2'
+const password = process.argv[2]
+const name = process.argv[3]
+const number = process.argv[4]
 
 const url =
-  `mongodb+srv://brianshanley24:${password}@cluster0.um9s28l.mongodb.net/noteApp?retryWrites=true&w=majority`
+  `mongodb+srv://brianshanley24:${password}@phonebook.e241vxt.mongodb.net/?retryWrites=true&w=majority`
 
-mongoose.set('strictQuery',false)
-mongoose.connect(url)
+mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
 
-const noteSchema = new mongoose.Schema({
-  content: String,
-  important: Boolean,
+const personSchema = new mongoose.Schema({
+  name: String,
+  number: String,
 })
 
-const Note = mongoose.model('Note', noteSchema)
+const Person = mongoose.model('Person', personSchema)
 
-const note1 = new Note({
-  content: 'HTML is Easy',
-  important: true,
-})
+if (process.argv.length === 5) {
+  const person = new Person({
+    name,
+    number
+  })
 
-// note1.save().then(result => {
-//   console.log('note saved!')
-// })
-
-const note2 = new Note({
-  content: 'MongoDB is Awesome',
-  important: false,
-})
-
-// note2.save().then(result => {
-//   console.log('another note saved!')
-// }).finally(() => {
-//   mongoose.connection.close()
-// })
-
-// Note.find({}).then(result => {
-//     result.forEach(note => {
-//       console.log(note)
-//     })
-//     mongoose.connection.close()
-//   })
-
-  const findNotes = async () =>{
-    try {
-        const result = await Note.find({})
-        result.forEach(note => console.log(note))
-    } catch (error) {
-        console.log("no notes found")
-    } finally{
-        mongoose.connection.close()
-    }
-  }
-
-  findNotes();
+  person.save().then(result => {
+    console.log(`added ${name} number ${number} to phonebook`)
+    mongoose.connection.close()
+  })
+} else if (process.argv.length === 3) {
+  console.log('phonebook:')
+  Person.find({}).then(result => {
+    result.forEach(person => {
+      console.log(`${person.name} ${person.number}`)
+    })
+    mongoose.connection.close()
+  })
+}
