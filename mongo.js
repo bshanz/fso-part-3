@@ -17,9 +17,17 @@ const url =
 mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
 
 const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
-})
+  name: {
+    type: String,
+    required: [true, 'Name field is required'],
+    minlength: [7, 'Name must have at least 7 characters']
+  },
+  number: {
+    type: String,
+    required: [true, 'Number field is required'],
+  },
+});
+
 
 const Person = mongoose.model('Person', personSchema)
 
@@ -32,7 +40,11 @@ if (process.argv.length === 5) {
   person.save().then(result => {
     console.log(`added ${name} number ${number} to phonebook`)
     mongoose.connection.close()
-  })
+  }).catch(error => {
+    console.log('Error:', error.message);
+    mongoose.connection.close();
+  });
+
 } else if (process.argv.length === 3) {
   console.log('phonebook:')
   Person.find({}).then(result => {
