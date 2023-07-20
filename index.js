@@ -29,29 +29,6 @@ const requestLogger = (request, response, next) => {
 
   app.use(requestLogger)
 
-// let persons = [
-//     { 
-//       "id": 1,
-//       "name": "Arto Hellas", 
-//       "number": "040-123456"
-//     },
-//     { 
-//       "id": 2,
-//       "name": "Ada Lovelace", 
-//       "number": "39-44-5323523"
-//     },
-//     { 
-//       "id": 3,
-//       "name": "Dan Abramov", 
-//       "number": "12-43-234345"
-//     },
-//     { 
-//       "id": 4,
-//       "name": "Mary Poppendieck", 
-//       "number": "39-23-6423122"
-//     }
-// ]
-
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
@@ -118,36 +95,36 @@ app.get('/api/persons/:id', async (request, response, next) => {
       })
       .catch(error => next(error))
   })
-  
-
-//   const generateId = () => {
-//     const maxId = notes.length > 0
-//       ? Math.max(...notes.map(n => n.id))
-//       : 0
-//     return maxId + 1
-//   }
 
 const generateId = () => {
     const randomNumber = Math.floor(Math.random() * 10001);
     return randomNumber
 }
   
-app.post('/api/persons', (request, response, next) => {
-  const body = request.body
+app.post('/api/persons', async (request, response, next) => {
+  const body = request.body;
+  console.log("HELLLPPPP")
 
   if (!body.name || !body.number) {
-    return response.status(400).json({ error: 'name or number missing' })
+    console.log("NAME OR NUMBER MISSING")
+    return response.status(400).json({ error: 'name or number missing' });
   }
 
   const person = new Person({
     name: body.name,
     number: body.number
-  })
+  });
 
-  person.save()
-    .then(savedPerson => response.json(savedPerson))
-    .catch(error => next(error))
-})
+  try {
+    console.log("save it")
+    const savedPerson = await person.save();
+    console.log("char length", savedPerson.name.length)
+    response.json(savedPerson);
+  } catch (error) {
+    next(error);
+  }
+});
+
 
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
@@ -164,18 +141,31 @@ const unknownEndpoint = (request, response) => {
 
 app.use(unknownEndpoint)
 
+// const errorHandler = (error, request, response, next) => {
+//   console.error(error.message)
+
+//   if (error.name === 'CastError') {
+//     return response.status(400).send({ error: 'malformed id' })
+//   } else if (error.name === 'ValidationError') {
+//     return response.status(400).send({ error: error.message })
+//   } else if (error.name === 'MongoError' && error.code === 11000) {
+//     return response.status(400).send({ error: 'duplicate field value' })
+//   }
+
+//   return response.status(500).send({ error: 'something went wrong' })
+// }
+
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
   if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformed id' })
+    return response.status(400).send({ error: 'malformatted id' })
+
   } else if (error.name === 'ValidationError') {
-    return response.status(400).send({ error: error.message })
-  } else if (error.name === 'MongoError' && error.code === 11000) {
-    return response.status(400).send({ error: 'duplicate field value' })
+    return response.status(400).json({ error: error.message })
   }
 
-  return response.status(500).send({ error: 'something went wrong' })
+  next(error)
 }
 
 
