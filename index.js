@@ -4,7 +4,6 @@ const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
-const person = require('./models/person')
 
 console.log("updated")
 
@@ -25,22 +24,22 @@ const requestLogger = (request, response, next) => {
     console.log('Body:  ', request.body)
     console.log('---')
     next()
-  }
+}
 
-  app.use(requestLogger)
+app.use(requestLogger)
 
-  const errorHandler = (error, request, response, next) => {
+const errorHandler = (error, request, response, next) => {
     console.error(error.message)
-  
+
     if (error.name === 'CastError') {
       return response.status(400).send({ error: 'malformatted id' })
-  
+
     } else if (error.name === 'ValidationError') {
       return response.status(400).json({ error: error.message })
     }
-  
+
     next(error)
-  }
+}
 
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
@@ -85,37 +84,31 @@ app.get('/api/persons/:id', async (request, response, next) => {
       console.log(error);
       next(error);
   }
-});
+})
 
-
-  app.get('/api/person/:id', (request, response) => {
-    Person.findById(request.params.id).then(person => {
-      response.json(person)
-    })
-  })
-
-  app.put('/api/persons/:id', (request, response, next) => {
+app.put('/api/persons/:id', (request, response, next) => {
     const body = request.body
-  
+
     const person = {
       name: body.name,
       number: body.number,
     }
-  
+
     Person.findByIdAndUpdate(request.params.id, person, { new: true })
       .then(updatedPerson => {
         response.json(updatedPerson)
       })
       .catch(error => next(error))
-  })
+})
 
 const generateId = () => {
     const randomNumber = Math.floor(Math.random() * 10001);
     return randomNumber
 }
-  
+
 app.post('/api/persons', async (request, response, next) => {
   const body = request.body;
+  console.log("name length", body.name.length)
 
   if (!body.name || !body.number) {
     console.log("NAME OR NUMBER MISSING")
@@ -137,7 +130,6 @@ app.post('/api/persons', async (request, response, next) => {
   }
 });
 
-
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndRemove(request.params.id)
     .then(result => {
@@ -152,21 +144,6 @@ const unknownEndpoint = (request, response) => {
 }
 
 app.use(unknownEndpoint)
-
-// const errorHandler = (error, request, response, next) => {
-//   console.error(error.message)
-
-//   if (error.name === 'CastError') {
-//     return response.status(400).send({ error: 'malformed id' })
-//   } else if (error.name === 'ValidationError') {
-//     return response.status(400).send({ error: error.message })
-//   } else if (error.name === 'MongoError' && error.code === 11000) {
-//     return response.status(400).send({ error: 'duplicate field value' })
-//   }
-
-//   return response.status(500).send({ error: 'something went wrong' })
-// }
-
 
 // This should be the last piece of middleware in the file
 app.use(errorHandler)
