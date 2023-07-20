@@ -29,6 +29,19 @@ const requestLogger = (request, response, next) => {
 
   app.use(requestLogger)
 
+  const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+  
+    if (error.name === 'CastError') {
+      return response.status(400).send({ error: 'malformatted id' })
+  
+    } else if (error.name === 'ValidationError') {
+      return response.status(400).json({ error: error.message })
+    }
+  
+    next(error)
+  }
+
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
@@ -103,7 +116,6 @@ const generateId = () => {
   
 app.post('/api/persons', async (request, response, next) => {
   const body = request.body;
-  console.log("HELLLPPPP")
 
   if (!body.name || !body.number) {
     console.log("NAME OR NUMBER MISSING")
@@ -154,19 +166,6 @@ app.use(unknownEndpoint)
 
 //   return response.status(500).send({ error: 'something went wrong' })
 // }
-
-const errorHandler = (error, request, response, next) => {
-  console.error(error.message)
-
-  if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
-
-  } else if (error.name === 'ValidationError') {
-    return response.status(400).json({ error: error.message })
-  }
-
-  next(error)
-}
 
 
 // This should be the last piece of middleware in the file

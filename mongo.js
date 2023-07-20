@@ -19,11 +19,15 @@ mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
 const personSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
-    minlength: 7
+    required: [true, 'Name field is required'],
+    minlength: [7, 'Name must have at least 7 characters']
   },
-  number: String,
+  number: {
+    type: String,
+    required: [true, 'Number field is required'],
+  },
 });
+
 
 const Person = mongoose.model('Person', personSchema)
 
