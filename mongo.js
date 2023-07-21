@@ -32,13 +32,22 @@ if (process.argv.length === 5) {
     number
   })
 
-  person.save().then(result => {
+  // person.save().then(result => {
+  //   console.log(`added ${name} number ${number} to phonebook`)
+  //   mongoose.connection.close()
+  // }).catch(error => {
+  //   console.log('Error:', error.message);
+  //   mongoose.connection.close();
+  // });
+
+  person.save().then(() => {
     console.log(`added ${name} number ${number} to phonebook`)
     mongoose.connection.close()
   }).catch(error => {
     console.log('Error:', error.message);
     mongoose.connection.close();
   });
+
 
 } else if (process.argv.length === 3) {
   console.log('phonebook:')
