@@ -5,7 +5,7 @@ const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
 
-console.log("updated")
+console.log("3.21 done")
 
 app.use(cors())
 
