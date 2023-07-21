@@ -1,3 +1,5 @@
+// This file is no longer used.
+
 const mongoose = require('mongoose')
 
 if (process.argv.length < 3) {
@@ -17,16 +19,9 @@ const url =
 mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
 
 const personSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: [true, 'Name field is required'],
-    minlength: [7, 'Name must have at least 7 characters']
-  },
-  number: {
-    type: String,
-    required: [true, 'Number field is required'],
-  },
-});
+  name: String,
+  number: String,
+})
 
 
 const Person = mongoose.model('Person', personSchema)

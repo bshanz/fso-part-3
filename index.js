@@ -86,20 +86,30 @@ app.get('/api/persons/:id', async (request, response, next) => {
   }
 })
 
-app.put('/api/persons/:id', (request, response, next) => {
-    const body = request.body
+app.put('/api/persons/:id', async (request, response, next) => {
+  const body = request.body
 
-    const person = {
-      name: body.name,
-      number: body.number,
+  const person = {
+    name: body.name,
+    number: body.number,
+  }
+
+  try {
+    const updatedPerson = await Person.findByIdAndUpdate(request.params.id, person, { new: true, runValidators: true, context: 'query' })
+    if(updatedPerson) {
+      response.json(updatedPerson)
+    } else {
+      response.status(404).send({ error: 'not found' })
     }
-
-    Person.findByIdAndUpdate(request.params.id, person, { new: true })
-      .then(updatedPerson => {
-        response.json(updatedPerson)
-      })
-      .catch(error => next(error))
+  } catch (error) {
+      if (error.name === 'ValidationError') {
+        response.status(400).send({ error: error.message });
+      } else {
+        next(error);
+      }
+  }
 })
+
 
 const generateId = () => {
     const randomNumber = Math.floor(Math.random() * 10001);
